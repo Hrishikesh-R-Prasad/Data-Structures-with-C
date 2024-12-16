@@ -1,66 +1,60 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define MAX 100
 
-char stack[MAX];
-int top = -1;
-
-void push(char x) {
-    stack[++top] = x;
+int prec(char c) {
+    if (c == '^') return 3;
+    else if (c == '/' || c == '*') return 2;
+    else if (c == '+' || c == '-') return 1;
+    else return -1;
 }
 
-char pop() {
-    return stack[top--];
+char associativity(char c) {
+    if (c == '^') return 'R';
+    return 'L';
 }
 
-int priority(char x) {
-    if (x == '+' || x == '-') {
-        return 1;
-    } else if (x == '*' || x == '/') {
-        return 2;
-    } else {
-        return 0;
-    }
-}
+void infixToPostfix(const char *s) {
+    char result[MAX];
+    char stack[MAX];
+    int resultIndex = 0;
+    int stackIndex = -1;
+    int len = strlen(s);
 
-void infixToPostfix(char infix[], char postfix[]) {
-    int i, j = 0;
-    char x;
+    for (int i = 0; i < len; i++) {
+        char c = s[i];
 
-    for (i = 0; infix[i] != '\0'; i++) {
-        if (infix[i] == '(') {
-            push(infix[i]);
-        } else if (infix[i] == ')') {
-            while ((x = pop()) != '(') {
-                postfix[j++] = x;
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+            result[resultIndex++] = c;
+        } else if (c == '(') {
+            stack[++stackIndex] = c;
+        } else if (c == ')') {
+            while (stackIndex >= 0 && stack[stackIndex] != '(') {
+                result[resultIndex++] = stack[stackIndex--];
             }
-        } else if (infix[i] == '+' || infix[i] == '-' || infix[i] == '*' || infix[i] == '/') {
-            while (top >= 0 && priority(stack[top]) >= priority(infix[i])) {
-                postfix[j++] = pop();
-            }
-            push(infix[i]);
+            stackIndex--;
         } else {
-            postfix[j++] = infix[i];
+            while (stackIndex >= 0 && (prec(c) < prec(stack[stackIndex]) || (prec(c) == prec(stack[stackIndex]) && associativity(c) == 'L'))) {
+                result[resultIndex++] = stack[stackIndex--];
+            }
+            stack[++stackIndex] = c;
         }
     }
 
-    while (top >= 0) {
-        postfix[j++] = pop();
+    while (stackIndex >= 0) {
+        result[resultIndex++] = stack[stackIndex--];
     }
 
-    postfix[j] = '\0';
+    result[resultIndex] = '\0';
+    printf("Postfix expression: %s\n", result);
 }
 
 void main() {
-    char infix[MAX], postfix[MAX];
-
-    printf("Enter a valid parenthesized infix arithmetic expression: ");
-    fgets(infix, sizeof(infix), stdin);
-    infix[strcspn(infix, "\n")] = 0; 
-
-    infixToPostfix(infix, postfix);
-
-    printf("Postfix expression: %s\n", postfix);
-
+    char exp[MAX];
+    printf("Enter an infix expression: ");
+    fgets(exp, MAX, stdin);
+    exp[strcspn(exp, "\n")] = 0;
+    infixToPostfix(exp);
 }
