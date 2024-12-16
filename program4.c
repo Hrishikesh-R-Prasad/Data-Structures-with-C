@@ -68,7 +68,7 @@ void display(struct Node* head) {
     printf("\n");
 }
 
-int main() {
+void main() {
     struct Node* head = NULL;
     int choice, data, position;
     while (1) {
