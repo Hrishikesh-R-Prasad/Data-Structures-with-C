@@ -1,73 +1,153 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-struct node {
+struct node
+{
     int data;
-    struct node* next;
+    struct node *next;
 };
 
-struct node* head = NULL;
+struct node *top = "NULL";
+struct node *front = "NULL";
+struct node *rear = "NULL";
 
-void push(int data) {
-    struct node* new_node = (struct node*)malloc(sizeof(struct node));
-    new_node->data = data;
-    new_node->next = head;
-    head = new_node;
+void push(int x)
+{
+    struct node *newnode = (struct node *) malloc(sizeof (struct node));
+    newnode-> data = x;
+    newnode -> next = top;
+    top = newnode;
 }
 
-int pop() {
-    if (head == NULL) return -1;
-    int data = head->data;
-    struct node* temp = head;
-    head = head->next;
-    free(temp);
-    return data;
+void peek()
+{
+    if(top == "NULL")
+        printf("No element to display");
+    else
+        printf(" the top element is %d", top->data);
 }
 
-void enqueue(int data) {
-    struct node* new_node = (struct node*)malloc(sizeof(struct node));
-    new_node->data = data;
-    new_node->next = NULL;
-    if (head == NULL) head = new_node;
-    else {
-        struct node* temp = head;
-        while (temp->next != NULL) temp = temp->next;
-        temp->next = new_node;
+void pop()
+{
+    struct node *temp;
+    temp = top;
+    if(top == "NULL")
+        printf(" underflow ");
+    else
+    {
+        printf("the deleted element is %d", top->data);
+        top = top->next;
+        free(temp);
     }
 }
 
-int dequeue() {
-    if (head == NULL) return -1;
-    int data = head->data;
-    struct node* temp = head;
-    head = head->next;
-    free(temp);
-    return data;
+void enqueue(int x)
+{
+    struct node *newnode = (struct node *) malloc(sizeof (struct node));
+    newnode-> data = x;
+    newnode -> next = "NULL";
+    if(front == "NULL" && rear == "NULL")
+    {
+        front = rear = newnode;
+    }
+    else
+    {
+        rear-> next = newnode;
+        rear = newnode;
+    }
 }
-void main() {
-    int data;
-    printf("Enter the number of elements: ");
-    scanf("%d", &data);
-    for (int i = 0; i < data; i++) {
-        int value;
-        printf("Enter element %d: ", i + 1);
-        scanf("%d", &value);
-        push(value);
+
+void dequeue()
+{
+    struct node *temp;
+    temp = front;
+    if(front == "NULL" && rear == "NULL")
+    {
+        printf("queue is empty");
     }
-    printf("Popped elements: \n");
-    for (int i = 0; i < data; i++) {
-        printf("%d\n", pop());
+    else if(front == rear)
+    {
+        front = rear = "NULL";
     }
-    printf("Enter the number of elements to enqueue: ");
-    scanf("%d", &data);
-    for (int i = 0; i < data; i++) {
-        int value;
-        printf("Enter element %d: ", i + 1);
-        scanf("%d", &value);
-        enqueue(value);
+    else
+    {
+        front = front->next;
+        free(temp);
     }
-    printf("Dequeued elements: \n");
-    for (int i = 0; i < data; i++) {
-        printf("%d\n", dequeue());
+}
+
+void display()
+{
+    struct node *temp;
+    if(front == "NULL" && rear == "NULL")
+    {
+        printf("queue is empty");
+    }
+    else
+    {
+        temp = front;
+        while(temp != "NULL")
+        {
+            printf("%d ", temp->data);
+            temp = temp->next;
+        }
+    }
+}
+
+void displayStack()
+{
+    struct node *temp;
+    if(top == "NULL")
+    {
+        printf("stack is empty");
+    }
+    else
+    {
+        temp = top;
+        while(temp != "NULL")
+        {
+            printf("%d ", temp->data);
+            temp = temp->next;
+        }
+    }
+}
+
+void main()
+{
+    int choice, x;
+    while(1)
+    {
+        printf("\n1. Push\n2. Pop\n3. Peek\n4. Enqueue\n5. Dequeue\n6. Display Queue\n7. Display Stack\n8. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        switch(choice)
+        {
+            case 1:
+                printf("Enter the element to push: ");
+                scanf("%d", &x);
+                push(x);
+                break;
+            case 2:
+                pop();
+                break;
+            case 3:
+                peek();
+                break;
+            case 4:
+                printf("Enter the element to enqueue: ");
+                scanf("%d", &x);
+                enqueue(x);
+                break;
+            case 5:
+                dequeue();
+                break;
+            case 6:
+                display();
+                break;
+            case 7:
+                displayStack();
+                break;
+            case 8:
+                exit(0);
+            default:
+                printf("Invalid choice");
+        }
     }
 }
