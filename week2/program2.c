@@ -1,60 +1,78 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <ctype.h>
+#define STACK_SIZE 50
 
-#define MAX 100
+char stack[STACK_SIZE];
+int top = -1;
 
-int prec(char c) {
-    if (c == '^') return 3;
-    else if (c == '/' || c == '*') return 2;
-    else if (c == '+' || c == '-') return 1;
-    else return -1;
+// Function to push an operator onto the stack
+void push(char c) {
+    if (top == STACK_SIZE - 1) {
+        printf("Stack overflow\n");
+        exit(1);
+    }
+    stack[++top] = c;
 }
 
-char associativity(char c) {
-    if (c == '^') return 'R';
-    return 'L';
+// Function to pop an operator from the stack
+char pop() {
+    if (top == -1) {
+        printf("Stack underflow\n");
+        exit(1);
+    }
+    return stack[top--];
 }
 
-void infixToPostfix(const char *s) {
-    char result[MAX];
-    char stack[MAX];
-    int resultIndex = 0;
-    int stackIndex = -1;
-    int len = strlen(s);
+// Function to get the precedence of operators
+int precedence(char op) {
+    switch (op) {
+        case '+':
+        case '-': return 1;
+        case '*':
+        case '/': return 2;
+        default: return 0;
+    }
+}
 
-    for (int i = 0; i < len; i++) {
-        char c = s[i];
+// Function to convert infix to postfix
+void infixToPostfix(char infix[], char postfix[]) {
+    int i = 0, j = 0;
+    char c;
 
-        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
-            result[resultIndex++] = c;
-        } else if (c == '(') {
-            stack[++stackIndex] = c;
-        } else if (c == ')') {
-            while (stackIndex >= 0 && stack[stackIndex] != '(') {
-                result[resultIndex++] = stack[stackIndex--];
+    while (infix[i] != '\0') {
+        if (isalnum(infix[i])) {  // If operand, add to postfix
+            postfix[j++] = infix[i];
+        } else if (infix[i] == '(') {  // Push '(' onto stack
+            push(infix[i]);
+        } else if (infix[i] == ')') {  // Pop until '(' is found
+            while (top != -1 && (c = pop()) != '(') {
+                postfix[j++] = c;
             }
-            stackIndex--;
-        } else {
-            while (stackIndex >= 0 && (prec(c) < prec(stack[stackIndex]) || (prec(c) == prec(stack[stackIndex]) && associativity(c) == 'L'))) {
-                result[resultIndex++] = stack[stackIndex--];
+        } else {  // Operator encountered
+            while (top != -1 && precedence(stack[top]) >= precedence(infix[i])) {
+                postfix[j++] = pop();
             }
-            stack[++stackIndex] = c;
+            push(infix[i]);
         }
+        i++;
     }
 
-    while (stackIndex >= 0) {
-        result[resultIndex++] = stack[stackIndex--];
+    // Pop remaining operators in the stack
+    while (top != -1) {
+        postfix[j++] = pop();
     }
 
-    result[resultIndex] = '\0';
-    printf("Postfix expression: %s\n", result);
+    postfix[j] = '\0';  // Null-terminate the postfix string
 }
 
 void main() {
-    char exp[MAX];
-    printf("Enter an infix expression: ");
-    fgets(exp, MAX, stdin);
-    exp[strcspn(exp, "\n")] = 0;
-    infixToPostfix(exp);
+    char infix[50], postfix[50];
+
+    printf("Enter a valid infix expression: ");
+    scanf("%s", infix);
+
+    infixToPostfix(infix, postfix);
+
+    printf("Postfix expression: %s\n", postfix);
 }
